@@ -1,6 +1,4 @@
-import java.lang.reflect.Array;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Arrays;
 import java.util.Stack;
 
 /**
@@ -17,7 +15,7 @@ public class Board {
 	 */
 	
 	//game board
-	Stack[] boardA;
+	Stack<Integer>[] boardA;
 	
 	//board size
 	private static int boardSize;
@@ -37,7 +35,8 @@ public class Board {
 	
 	public Board(){
 		boardSize=24;
-		initializeGame(); 
+		initializeGame();
+		printBoard(); 
 	}
 	
 	private void initializeGame()
@@ -92,6 +91,7 @@ public class Board {
 			{
 				putInitPieces(boardA[i], 2, 2);
 			}
+			
 		}
 
 	}
@@ -99,19 +99,53 @@ public class Board {
 	/*
 	 * puts correct number of pieces in a given stack
 	 */
-	private Stack putInitPieces(Stack s, int numPieces, int numPlayer)
+	private Stack<Integer> putInitPieces(Stack<Integer> s, int numPieces, int numPlayer)
 	{
 		for(int i=0; i<numPieces; i++)
 		{
 			s.push(numPlayer);
 		}
+		
 		return s; 
 	}
 	
+	/*
+	 * print board
+	 */
+	public void printBoard()
+	{
+		String print="";
+		for(int i=0; i<boardSize; i++)
+		{
+			print += Arrays.toString(boardA[i].toArray());
+		}
+		System.out.println(print);
+	}
+	
+	/*
+	 * generates a random number from 1-6 for the die roll
+	 */
+	public int dieRoll()
+	{
+		return (1 + (int)(Math.random() * 6)); 
+	}
+	
+	/*
+	 * checks who won the game
+	 */
+	public int gameWon()
+	{
+		if(winPlayer1==15)
+			return 1; 
+		if(winPlayer2==15)
+			return 2; 
+		else
+			return 0; 
+	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		Board b = new Board(); 
 	}
 
 }
