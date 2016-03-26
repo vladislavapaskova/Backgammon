@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -32,13 +33,18 @@ public class Board {
 	int finalPlayer1; 
 	int finalPlayer2; 
 	
-	
+	/*
+	 * board constructor
+	 */
 	public Board(){
 		boardSize=24;
 		initializeGame();
 		printBoard(); 
 	}
 	
+	/*
+	 * initializes game
+	 */
 	private void initializeGame()
 	{
 		outPlayer1=0; 
@@ -50,6 +56,7 @@ public class Board {
 		
 		initializeBoardArray(); 
 	}
+	
 	/*
 	 * This method initializes the initial board
 	 * i.e. puts all of the pieces in the correct locations
@@ -130,6 +137,36 @@ public class Board {
 		return (1 + (int)(Math.random() * 6)); 
 	}
 	
+	
+	/*
+	 * move
+	 */
+	public void movePiece(int numPlayer,int pieceCol, int diceRoll){
+		
+		int finalSix;
+		int winPiece; 
+		
+		if(numPlayer==1)
+		{
+			winPiece= winPlayer1; 
+			finalSix= finalPlayer1; 
+		}
+		else 
+		{
+			winPiece= winPlayer2; 
+			finalSix=finalPlayer2; 
+		}
+		
+		//we are not at the final stretch yet
+		if((finalSix+winPiece)!=15)
+		{
+			
+		}
+		
+		
+	}
+	
+	
 	/*
 	 * checks who won the game
 	 */
@@ -141,6 +178,48 @@ public class Board {
 			return 2; 
 		else
 			return 0; 
+	}
+	
+	/*
+	 * This method returns the positions at which the given player can move a piece FROM
+	 */
+	public ArrayList<Integer> checkMovingPositions(int numPlayer){
+		
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		
+		for(int i=0; i<boardSize; i++)
+		{
+			if(boardA[i].peek()==numPlayer)
+			{
+				list.add(i);
+			}
+		}
+		
+		return list; 
+		
+	}
+	
+	/*
+	 * checks if the piece can move in this column
+	 */
+	public boolean checkIfPieceCanMove(int numPlayer, int col){
+		if(boardA[col].peek()==null||boardA[col].peek()==numPlayer)
+			return true; 
+		else 
+		{
+			int temp= boardA[col].pop();
+			
+			if(boardA[col].peek()==null)
+			{
+				boardA[col].push(temp);
+				return true;
+			}
+			else
+			{
+				boardA[col].push(temp);
+				return false; 
+			}	
+		}
 	}
 	
 	public static void main(String[] args) {
