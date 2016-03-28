@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
+import java.util.Random;
 
 /**
  *This Class is going to hold the backgammon board and the main logic behind moving the pieces 
@@ -32,6 +33,9 @@ public class Board {
 	//pieces in final six lanes; we count those to see if we can start taking pieces out towards winning
 	int finalPlayer1; 
 	int finalPlayer2; 
+	
+	//create a variable for the dice roll
+	int diceRoll; 
 	
 	/*
 	 * board constructor
@@ -145,6 +149,8 @@ public class Board {
 		
 		int finalSix;
 		int winPiece; 
+		ArrayList<Integer> availablePos; 
+		int playingPos;
 		
 		if(numPlayer==1)
 		{
@@ -157,8 +163,33 @@ public class Board {
 			finalSix=finalPlayer2; 
 		}
 		
+		
+		//set the dice roll
+		diceRoll=dieRoll(); 
+		//check all of the pieces that the player can use
+		availablePos=checkMovingPositions(numPlayer);
+		/*
+		 * pick a random piece
+		 * needs to change one we use minimax/reinforcement learning
+		 */
+		playingPos= availablePos.get(0 + (int)(Math.random() * availablePos.size()));
+		System.out.println("Random position picked:"+playingPos);
+		
 		//we are not at the final stretch yet
 		if((finalSix+winPiece)!=15)
+		{
+			while(!checkIfPieceCanMove(numPlayer, (playingPos+diceRoll))){
+				playingPos= availablePos.get(0 + (int)(Math.random() * availablePos.size()));
+				System.out.println("Random position changed to:"+playingPos);
+			}
+			//take the piece from where it was
+			boardA[playingPos].pop(); 
+			
+			//check if the piece is on top of the other player's piece
+			
+			
+		}
+		else
 		{
 			
 		}
