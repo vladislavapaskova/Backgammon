@@ -194,7 +194,7 @@ public class Board {
 					//take the piece from where it was
 					boardA[playingPos].pop(); 
 					//check if the piece is on top of the other player's piece
-					if(boardA[playingPos+diceRoll].peek()==2)
+					if(!boardA[playingPos+diceRoll].isEmpty()&&boardA[playingPos+diceRoll].peek()==2)
 					{
 						boardA[playingPos+diceRoll].pop();
 						outPlayer2++; 
@@ -213,7 +213,7 @@ public class Board {
 						System.out.println("Random position changed to:"+playingPos);
 					}
 					boardA[playingPos].pop(); 
-					if(numPlayer==2&&boardA[playingPos-diceRoll].peek()==1)
+					if(!boardA[playingPos-diceRoll].isEmpty()&&numPlayer==2&&boardA[playingPos-diceRoll].peek()==1)
 					{
 						boardA[playingPos-diceRoll].pop();
 						outPlayer1++; 
@@ -238,7 +238,7 @@ public class Board {
 					}
 					boardA[playingPos].pop(); 
 					//check if the piece is on top of the other player's piece
-					if(boardA[playingPos+diceRoll].peek()==2)
+					if(!boardA[playingPos+diceRoll].isEmpty()&&boardA[playingPos+diceRoll].peek()==2)
 					{
 						boardA[playingPos+diceRoll].pop();
 						outPlayer2++; 
@@ -261,7 +261,7 @@ public class Board {
 					}
 					boardA[playingPos].pop(); 
 					//check if the piece is on top of the other player's piece
-					if(boardA[playingPos-diceRoll].peek()==1)
+					if(!boardA[playingPos-diceRoll].isEmpty()&&boardA[playingPos-diceRoll].peek()==1)
 					{
 						boardA[playingPos-diceRoll].pop();
 						outPlayer1++; 
@@ -338,9 +338,9 @@ public class Board {
 		
 		for(int i=0; i<boardSize; i++)
 		{
-			System.out.println(i);
-			if(boardA[i].peek()==numPlayer&&boardA[i].peek()!=null)
+			if(!boardA[i].isEmpty()&&boardA[i].peek()==numPlayer)
 			{
+				//System.out.println(i);
 				list.add(i);
 			}
 		}
@@ -355,7 +355,8 @@ public class Board {
 	public boolean checkIfPieceCanMove(int numPlayer, int col){
 		//check if it goes outside of the board
 		if(col<boardA.length||col>=0){
-			if(boardA[col].peek()==null||boardA[col].peek()==numPlayer)
+			System.out.println(col);
+			if(boardA[col].isEmpty()||boardA[col].peek()==numPlayer)
 				return true; 
 			else 
 			{
@@ -380,7 +381,13 @@ public class Board {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Board b = new Board(); 
-		b.movePiece(1); 
+		b.movePiece(1);
+		b.printBoard(); 
+		b.movePiece(2);
+		b.printBoard(); 
+		b.movePiece(1);
+		b.printBoard(); 
+		b.movePiece(2);
 		b.printBoard(); 
 	}
 
