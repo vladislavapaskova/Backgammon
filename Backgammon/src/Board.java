@@ -3,7 +3,6 @@ import java.util.Arrays;
 import java.util.Stack;
 import java.util.Random;
 
-
 /**
  *This Class is going to hold the backgammon board and the main logic behind moving the pieces 
  */
@@ -46,6 +45,7 @@ public class Board {
 		boardSize = 24;
 		initializeGame();
 		printBoard();
+
 	}
 
 	/*
@@ -119,6 +119,7 @@ public class Board {
 			print += Arrays.toString(boardA[i].toArray());
 		}
 		System.out.println(print);
+		System.out.println("thwewe");
 	}
 
 	/*
@@ -131,7 +132,7 @@ public class Board {
 	/*
 	 * move
 	 */
-	public void movePiece(int numPlayer) {
+	public int movePiece(int numPlayer) {
 
 		int finalSix;
 		int winPiece;
@@ -148,7 +149,7 @@ public class Board {
 		} else {
 			winPiece = winPlayer2;
 			finalSix = finalPlayer2;
-			outPieces = outPlayer1;
+			outPieces = outPlayer2;
 		}
 
 		// set the dice roll
@@ -161,6 +162,7 @@ public class Board {
 			 * minimax/reinforcement learning
 			 */
 			playingPos = availablePos.get(0 + (int) (Math.random() * availablePos.size()));
+		    System.out.println("heree111");
 			System.out.println("Random position picked:" + playingPos);
 
 			// we are not at the final stretch yet
@@ -168,12 +170,14 @@ public class Board {
 				if (numPlayer == 1) {
 					while (!checkIfPieceCanMove(numPlayer, (playingPos + diceRoll))) {
 						playingPos = availablePos.get(0 + (int) (Math.random() * availablePos.size()));
-						System.out.println("Random position changed to:" + playingPos);
 					}
 					// take the piece from where it was
 					boardA[playingPos].pop();
 					// check if the piece is on top of the other player's piece
 					if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
+						if (playingPos + diceRoll < 6) {
+						finalPlayer2--;
+						}
 						boardA[playingPos + diceRoll].pop();
 						outPlayer2++;
 					}
@@ -185,16 +189,18 @@ public class Board {
 				} else if (numPlayer == 2) {
 					while (!checkIfPieceCanMove(numPlayer, (playingPos - diceRoll))) {
 						playingPos = availablePos.get(0 + (int) (Math.random() * availablePos.size()));
-						System.out.println("Random position changed to:" + playingPos);
 					}
 					boardA[playingPos].pop();
 					if (!boardA[playingPos - diceRoll].isEmpty() && numPlayer == 2
 							&& boardA[playingPos - diceRoll].peek() == 1) {
+						if ((playingPos - diceRoll) > 17) {
+							finalPlayer1--;
+							}
 						boardA[playingPos - diceRoll].pop();
 						outPlayer1++;
 					}
 					boardA[playingPos - diceRoll].push(2);
-					if (playingPos > 5 && (playingPos + diceRoll) < 6) {
+					if (playingPos > 5 && (playingPos - diceRoll) < 6) {
 						finalPlayer2++;
 					}
 				}
@@ -208,16 +214,16 @@ public class Board {
 						playingPos = availablePos.get(0 + (int) (Math.random() * availablePos.size()));
 					}
 					boardA[playingPos].pop();
-					// check if the piece is on top of the other player's piece
-					if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
-						boardA[playingPos + diceRoll].pop();
-						outPlayer2++;
-					}
 
 					if (playingPos + diceRoll > 23) {
 						winPlayer1++;
 						finalPlayer1--;
+						return diceRoll;
 					} else {
+						if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
+							boardA[playingPos + diceRoll].pop();
+							outPlayer2++;
+						}
 						boardA[playingPos + diceRoll].push(1);
 					}
 
@@ -227,16 +233,16 @@ public class Board {
 						playingPos = availablePos.get(0 + (int) (Math.random() * availablePos.size()));
 					}
 					boardA[playingPos].pop();
-					// check if the piece is on top of the other player's piece
-					if (!boardA[playingPos - diceRoll].isEmpty() && boardA[playingPos - diceRoll].peek() == 1) {
-						boardA[playingPos - diceRoll].pop();
-						outPlayer1++;
-					}
 
 					if (playingPos - diceRoll < 0) {
 						winPlayer2++;
 						finalPlayer2--;
+						return diceRoll;
 					} else {
+						if (!boardA[playingPos - diceRoll].isEmpty() && boardA[playingPos - diceRoll].peek() == 1) {
+							boardA[playingPos - diceRoll].pop();
+							outPlayer1++;
+						}
 						boardA[playingPos - diceRoll].push(2);
 					}
 
@@ -248,35 +254,42 @@ public class Board {
 			// if player 1 check if we can put pieces from 1-5
 			if (numPlayer == 1) {
 				if (checkIfPieceCanMove(1, diceRoll - 1)) {
-					if (boardA[diceRoll - 1].peek() == 2) {
-						boardA[diceRoll - 1].pop();
-						outPlayer2++;
-						finalPlayer2--;
+					if (boardA[diceRoll - 1].size() != 0) {
+						if (boardA[diceRoll - 1].peek() == 2) {
+							boardA[diceRoll - 1].pop();
+							outPlayer2++;
+							finalPlayer2--;
+						}
 					}
 					boardA[diceRoll - 1].push(1);
+					outPlayer1--;
 				}
 			}
 			// if player 2 check if we can put pieces from 18-23
 			if (numPlayer == 2) {
-				if (checkIfPieceCanMove(1, 24 - diceRoll)) {
-					if (boardA[24 - diceRoll].peek() == 1) {
-						boardA[24 - diceRoll].pop();
-						outPlayer1++;
-						finalPlayer1--;
+				if (checkIfPieceCanMove(2, 24 - diceRoll)) {
+					if (boardA[24 - diceRoll].size() != 0) {
+						if (boardA[24 - diceRoll].peek() == 1) {
+							boardA[24 - diceRoll].pop();
+							outPlayer1++;
+							finalPlayer1--;
+						}
 					}
 					boardA[24 - diceRoll].push(2);
+					outPlayer2--;
 				}
 			}
 		}
-
+   return diceRoll;
 	}
 
-	public String movePiece(int numPlayer, int pieceToMove, int position, int diceRoll) {
+	public String movePiece(int numPlayer, int pieceToMove, int diceRoll) {
 
 		int finalSix;
 		int winPiece;
 		int playingPos;
 		int outPieces;
+		int movedIndex = -1;
 
 		if (numPlayer == 1) {
 			winPiece = winPlayer1;
@@ -286,55 +299,49 @@ public class Board {
 		} else {
 			winPiece = winPlayer2;
 			finalSix = finalPlayer2;
-			outPieces = outPlayer1;
+			outPieces = outPlayer2;
 		}
 
-		// set the dice roll
 		if (outPieces == 0) {
-			// check all of the pieces that the player can use
-			//availablePos = checkMovingPositions(numPlayer);
-			/*
-			 * pick a random piece needs to change one we use
-			 * minimax/reinforcement learning
-			 */
-			playingPos = pieceToMove;
-			//System.out.println("Random position picked:" + playingPos);
 
-			// we are not at the final stretch yet
+			playingPos = pieceToMove;
+
 			if ((finalSix + winPiece) != 15) {
 				if (numPlayer == 1) {
-					if(!checkIfPieceCanMove(numPlayer, (position)) || !canMove(numPlayer, pieceToMove)) {
-						System.out.println("HEREEEEEE1111111");
-						return "The piece chosen can not move. Please roll again!";
+					if (!checkIfPieceCanMove(numPlayer, (playingPos + diceRoll)) || !canMove(numPlayer, pieceToMove)) {
+						return "The piece chosen can not move. Please choose another piece!";
 					}
 					// take the piece from where it was
+					System.out.println("hereeeeee");
 					System.out.println(playingPos);
 					boardA[playingPos].pop();
 					// check if the piece is on top of the other player's piece
-					if (!boardA[position].isEmpty() && boardA[position].peek() == 2) {
-						boardA[position].pop();
+					if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
+						boardA[playingPos + diceRoll].pop();
 						outPlayer2++;
 					}
-					boardA[position].push(1);
+					boardA[playingPos + diceRoll].push(1);
+					movedIndex = playingPos + diceRoll;
+
 					// check if it is final six
-					if (playingPos < 18 && (position) > 17) {
+					if (playingPos < 18 && (playingPos + diceRoll) > 17) {
 						finalPlayer1++;
 					}
 				} else if (numPlayer == 2) {
-					if (!checkIfPieceCanMove(numPlayer, (position)) || !canMove(numPlayer, pieceToMove)) {
-						System.out.println("HEREEEEEE1222222");
-						return "The piece chosen can not move. Please roll again!";
+					if (!checkIfPieceCanMove(numPlayer, (playingPos - diceRoll)) || !canMove(numPlayer, pieceToMove)) {
+						return "The piece chosen can not move. Please choose another piece!";
 					}
 					boardA[playingPos].pop();
-					if (!boardA[position].isEmpty() && numPlayer == 2
-							&& boardA[position].peek() == 1) {
-						boardA[position].pop();
+					if (!boardA[playingPos - diceRoll].isEmpty() && numPlayer == 2
+							&& boardA[playingPos - diceRoll].peek() == 1) {
+						boardA[playingPos - diceRoll].pop();
 						outPlayer1++;
 					}
-					
-					//fix this 
-					boardA[position].push(2);
-					if (playingPos > 5 && (playingPos + diceRoll) < 6) {
+
+					// fix this
+					boardA[playingPos - diceRoll].push(2);
+					movedIndex = playingPos - diceRoll;
+					if (playingPos > 5 && (playingPos - diceRoll) < 6) {
 						finalPlayer2++;
 					}
 				}
@@ -344,42 +351,44 @@ public class Board {
 				// add an extra rule that the piece can go beyond the boundary
 				// of the board
 				if (numPlayer == 1) {
-					if ((!checkIfPieceCanMove(numPlayer, (position)) && playingPos + diceRoll < 23) || !canMove(numPlayer, pieceToMove)) {
-						System.out.println("HEREEEEEE3333333");
-						return "The piece chosen can not move. Please roll again!";
+					if ((!checkIfPieceCanMove(numPlayer, (playingPos + diceRoll)) && playingPos + diceRoll < 23)
+							|| !canMove(numPlayer, pieceToMove)) {
+						return "The piece chosen can not move. Please choose another piece!";
 					}
 					boardA[playingPos].pop();
-					// check if the piece is on top of the other player's piece
-					if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
-						boardA[playingPos + diceRoll].pop();
-						outPlayer2++;
-					}
 
 					if (playingPos + diceRoll > 23) {
 						winPlayer1++;
 						finalPlayer1--;
+						return "-1";
 					} else {
+						if (!boardA[playingPos + diceRoll].isEmpty() && boardA[playingPos + diceRoll].peek() == 2) {
+							boardA[playingPos + diceRoll].pop();
+							outPlayer2++;
+						}
 						boardA[playingPos + diceRoll].push(1);
+						movedIndex = playingPos + diceRoll;
 					}
 
 				}
 				if (numPlayer == 2) {
-					while ((!checkIfPieceCanMove(numPlayer, (playingPos - diceRoll)) && playingPos - diceRoll >= 0 ) || !canMove(numPlayer, pieceToMove)) {
-						System.out.println("HEREEEEEE4");
-						return "The piece chosen can not move. Please roll again!";
+					while ((!checkIfPieceCanMove(numPlayer, (playingPos - diceRoll)) && playingPos - diceRoll >= 0)
+							|| !canMove(numPlayer, pieceToMove)) {
+						return "The piece chosen can not move. Please choose another piece!";
 					}
 					boardA[playingPos].pop();
-					// check if the piece is on top of the other player's piece
-					if (!boardA[playingPos - diceRoll].isEmpty() && boardA[playingPos - diceRoll].peek() == 1) {
-						boardA[playingPos - diceRoll].pop();
-						outPlayer1++;
-					}
 
 					if (playingPos - diceRoll < 0) {
 						winPlayer2++;
 						finalPlayer2--;
+						return "-1";
 					} else {
+						if (!boardA[playingPos - diceRoll].isEmpty() && boardA[playingPos - diceRoll].peek() == 1) {
+							boardA[playingPos - diceRoll].pop();
+							outPlayer1++;
+						}
 						boardA[playingPos - diceRoll].push(2);
+						movedIndex = playingPos - diceRoll;
 					}
 
 				}
@@ -390,35 +399,37 @@ public class Board {
 			// if player 1 check if we can put pieces from 1-5
 			if (numPlayer == 1) {
 				if (checkIfPieceCanMove(1, diceRoll - 1)) {
-					if (boardA[diceRoll - 1].peek() == 2) {
-						boardA[diceRoll - 1].pop();
-						outPlayer2++;
-						finalPlayer2--;
+					if (boardA[diceRoll - 1].size() != 0) {
+						if (boardA[diceRoll - 1].peek() == 2) {
+							boardA[diceRoll - 1].pop();
+							outPlayer2++;
+							finalPlayer2--;
+						}
 					}
 					boardA[diceRoll - 1].push(1);
-				}
-				else{
-					//System.out.println("Sorry! You can't move any pieces on to the board");
+					outPlayer1--;
+				} else {
 					return "Sorry! You can't move any pieces on to the board";
 				}
 			}
 			// if player 2 check if we can put pieces from 18-23
 			if (numPlayer == 2) {
-				if (checkIfPieceCanMove(1, 24 - diceRoll)) {
-					if (boardA[24 - diceRoll].peek() == 1) {
-						boardA[24 - diceRoll].pop();
-						outPlayer1++;
-						finalPlayer1--;
+				if (checkIfPieceCanMove(2, 24 - diceRoll)) {
+					if (boardA[24 - diceRoll].size() != 0) {
+						if (boardA[24 - diceRoll].peek() == 1) {
+							boardA[24 - diceRoll].pop();
+							outPlayer1++;
+							finalPlayer1--;
+						}
 					}
 					boardA[24 - diceRoll].push(2);
-				}
-				else{
-					//System.out.println("Sorry! You can't move any pieces on to the board");
+					outPlayer2--;
+				} else {
 					return "Sorry! You can't move any pieces on to the board";
 				}
 			}
 		}
-		return "";
+		return Integer.toString(movedIndex);
 
 	}
 
@@ -444,7 +455,6 @@ public class Board {
 
 		for (int i = 0; i < boardSize; i++) {
 			if (!boardA[i].isEmpty() && boardA[i].peek() == numPlayer) {
-				// System.out.println(i);
 				list.add(i);
 			}
 		}
@@ -466,11 +476,12 @@ public class Board {
 	public boolean checkIfPieceCanMove(int numPlayer, int col) {
 		// check if it goes outside of the board
 		if (col < boardA.length && col >= 0) {
+			System.out.println("HEREEE555");
 			System.out.println(col);
 			if (boardA[col].isEmpty() || boardA[col].peek() == numPlayer)
 				return true;
 			else {
-					if(boardA[col].size() == 1){
+				if (boardA[col].size() == 1) {
 					return true;
 				} else {
 					return false;
@@ -478,6 +489,16 @@ public class Board {
 			}
 		} else
 			return false;
+	}
+
+	public int playersOut() {
+		if (outPlayer1 > 0) {
+			return 1;
+		} else if (outPlayer2 > 0) {
+			return 2;
+		} else {
+			return 0;
+		}
 	}
 
 	public static void main(String[] args) {

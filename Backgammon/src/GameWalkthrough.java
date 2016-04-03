@@ -9,77 +9,81 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Stack;
+import javax.swing.Timer;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-public class BackgammonGUI extends JPanel {
+public class GameWalkthrough extends JPanel {
 
 	private File currentDiceRoll = new File("images/d1.png");
 	private File finishedRed = new File("images/RedFinishedEmpty.png");
 	private File finishedWhite = new File("images/WhiteFinishedEmpty.png");
 	private BufferedImage diceImg;
-	private Image roll;
 	private JLabel dice;
 	private int currentPlayer = 1;
-	private JButton rollDice;
 	private Board board = new Board();
 	private Image player1;
 	private Image player2;
 	private Image finishedRedImg;
 	private Image finishedWhiteImg;
-	private JTextField pieceToMove;
-	private JPanel submitPanel;
 	private JPanel submitMovePanel;
-	private int numToMove = -1;
-	private boolean moving1;
-	private boolean moving2;
-	private int diceRoll;
-	private int movedPosition;
 	private JLabel piecesOut;
 	private JLabel offBoardPiecesP1;
 	private JLabel offBoardPiecesP2;
+	private Timer timer;
 
-	public BackgammonGUI() {
+	public GameWalkthrough() {
 		super(new BorderLayout(0, 0));
 		setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, new Color(191, 159, 82)));
 		add(offBoardPieces(), BorderLayout.EAST);
 		setBackground(new Color(7, 19, 48));
-
+		startGame();
 	}
 
-	/*
-	 * USED FOR TESTING PURPOSES ONLY
-	 */
-	// public void initializeStacks() {
-	// for (int i = 0; i < board.length; i++) {
-	// Stack<Piece> stack = new Stack();
-	// board[i] = stack;
-	// int randomNum = 0 + (int) (Math.random() * 6);
-	// for (int j = 0; j < randomNum; j++) {
-	// stack.push(new Piece(((j % 2 == 0) ? "red" : "white")));
-	// }
-	//
-	// }
-	// }
+	public void startGame(){
+		timer = new Timer(200, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (board.gameWon() != 0) {
+					JOptionPane.showMessageDialog(submitMovePanel,
+							"Congratulations player " + board.gameWon() + "! You won!");
+					timer.stop();
+				}else{
+				rollDiceandMove(currentPlayer);
+				getNextPlayer();
+				}
+			}
+		});
+		timer.start();
+	}
 
-	/*
-	 * USED FOR TESTING PURPOSES ONLY
-	 */
-	public void checkIfStacksFilled() {
-		for (int i = 0; i < board.boardA.length; i++) {
-			Stack<Integer> stack = board.boardA[i];
-			System.out.print(stack.size() + " , ");
+	public void rollDiceandMove(int currentPlayer){
+		
+		updateDiceRollPanel(board.movePiece(currentPlayer));
+		if (board.winPlayer1 > 0 || board.winPlayer2 > 0) {
+			getRedFinalPieces(board.winPlayer1);
+			getWhiteFinalPieces(board.winPlayer2);
+			try {
+				finishedRedImg = ImageIO.read(finishedRed);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				finishedWhiteImg = ImageIO.read(finishedWhite);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			offBoardPiecesP1.setIcon(new ImageIcon(finishedRedImg));
+			offBoardPiecesP2.setIcon(new ImageIcon(finishedWhiteImg));
 		}
+		repaint();
+	
 	}
-
 	/*
 	 * JPanel that contains everything involving the dice rolling and choosing
 	 * of a piece to move/ move Ability to roll dice from 1-6 Ability to choose
@@ -100,132 +104,12 @@ public class BackgammonGUI extends JPanel {
 			dice = new JLabel(new ImageIcon(diceImg));
 			diceRollPanel.add(dice, BorderLayout.NORTH);
 		}
-		File file;
-		try {
-			if (currentPlayer == 1) {
-				file = new File("images/p1roll.png");
-			} else {
-				file = new File("images/p2roll.png");
-			}
-			roll = ImageIO.read(file);
-		} catch (IOException ex) {
-
-		}
-		pieceToMove = new JTextField("Piece you wish to move");
-		pieceToMove.setColumns(14);
-		pieceToMove.setForeground(new Color(94, 94, 94));
-		JButton submit = new JButton("Submit");
-		submit.setForeground(new Color(94, 94, 94));
-		submit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				System.out.println(currentPlayer);
-				if (currentPlayer == 1) {
-					numToMove = Integer.parseInt(pieceToMove.getText());
-
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					if (!board.canMove(1, numToMove)) {
-						JOptionPane.showMessageDialog(submitMovePanel, "There is no piece there to move! Please choose another piece!");
-						pieceToMove.setText("Piece you wish to move");
-						return;
-					} else {
-						
-						String result = board.movePiece(currentPlayer, numToMove, diceRoll);
-						if (board.gameWon() != 0) {
-							JOptionPane.showMessageDialog(submitMovePanel,
-									"Congratulations player " + board.gameWon() + "! You won!");
-						}
-						if (!result.equals("Sorry! You can't move any pieces on to the board")
-								&& !result.equals("The piece chosen can not move. Please choose another piece!")) {
-							movedPosition = Integer.parseInt(result);
-
-							moving1 = true;
-							moving2 = true;
-
-							if (board.winPlayer1 > 0 || board.winPlayer2 > 0) {
-								getRedFinalPieces(board.winPlayer1);
-								getWhiteFinalPieces(board.winPlayer2);
-								try {
-									finishedRedImg = ImageIO.read(finishedRed);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								try {
-									finishedWhiteImg = ImageIO.read(finishedWhite);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								offBoardPiecesP1.setIcon(new ImageIcon(finishedRedImg));
-								offBoardPiecesP2.setIcon(new ImageIcon(finishedWhiteImg));
-							}
-							
-						} else {
-							JOptionPane.showMessageDialog(submitMovePanel, result);
-							pieceToMove.setText("Piece you wish to move");
-							return;
-
-					}
-						submitPanel.setVisible(false);
-						rollDice.setVisible(true);
-						diceRollPanel.add(rollDice);
-						pieceToMove.setText("Piece you wish to move");
-  						board.movePiece(2);
-					}
-					repaint();
-				}
-			}
-
-		});
-		submitPanel = new JPanel(new BorderLayout(0, 0));
-		submitPanel.setBackground(new Color(11, 79, 45));
-		submitPanel.add(submit, BorderLayout.EAST);
-		submitPanel.add(pieceToMove, BorderLayout.WEST);
 		piecesOut = new JLabel("", SwingConstants.CENTER);
 		System.out.println(board.outPlayer1);
 		piecesOut.setText("Pieces Out:   " + "Player 1: " + board.outPlayer1 + "  " + "Player 2: " + board.outPlayer2);
 		piecesOut.setForeground(Color.white);
 		piecesOut.setBackground(new Color(11, 79, 45));
 		piecesOut.setBorder(BorderFactory.createMatteBorder(15, 15, 15, 15, new Color(11, 79, 45)));
-		rollDice = new JButton();
-		rollDice.setBorderPainted(false);
-		rollDice.setIcon(new ImageIcon(roll));
-		rollDice.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				diceRoll = 1 + (int) (Math.random() * 6);
-				updateDiceRollPanel(diceRoll);
-				if (currentPlayer == 1 && board.playersOut() != 1) {
-					rollDice.setVisible(false);
-					submitPanel.setVisible(true);
-					diceRollPanel.add(submitPanel);
-				} else {
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					submitPanel.setVisible(false);
-					rollDice.setVisible(true);
-					diceRollPanel.add(rollDice);
-					board.movePiece(1, -1, diceRoll);
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					repaint();
-					board.movePiece(2);
-				}
-				repaint();
-			}
-
-		});
-		diceRollPanel.add(rollDice, BorderLayout.CENTER);
 		diceRollPanel.add(piecesOut, BorderLayout.SOUTH);
 
 		return diceRollPanel;
@@ -278,20 +162,7 @@ public class BackgammonGUI extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		File file;
 		dice.setIcon(new ImageIcon(diceImg));
-		if (currentPlayer == 1) {
-			file = new File("images/p1roll.png");
-		} else {
-			file = new File("images/p2roll.png");
-		}
-		try {
-			roll = ImageIO.read(file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		rollDice.setIcon(new ImageIcon(roll));
 		revalidate();
 
 	}
@@ -482,24 +353,7 @@ public class BackgammonGUI extends JPanel {
 				stack.push(p);
 			}
 
-			if ((i == numToMove || i == movedPosition) && (moving1 == true || moving2 == true)) {
-				if (i == numToMove) {
-					g.setColor(Color.yellow);
-					g.drawRect((count2p * 55) - 3, (685 - 60 * (stack.size() + 1)) - 3, 55, 55);
-					moving1 = false;
-				}
-				if (i == movedPosition) {
-					g.setColor(Color.cyan);
-					if (movedPosition > 5) {
-						g.drawRect((12 - movedPosition) * 55 - 3,
-								(685 - 60 * board.boardA[movedPosition].size() - 1) - 3, 55, 55);
-					} else {
-						g.drawRect((13 - movedPosition) * 55 - 3,
-								(685 - 60 * board.boardA[movedPosition].size() - 1) - 3, 55, 55);
-					}
-					moving2 = false;
-				}
-			}
+			
 			g.setColor(Color.white);
 			g.drawString(i + "", count2p * 55, 690);
 
@@ -528,29 +382,6 @@ public class BackgammonGUI extends JPanel {
 				stack.push(p);
 			}
 
-			if ((i == numToMove || i == movedPosition) && (moving1 == true || moving2 == true)) {
-				if (i == numToMove) {
-					g.setColor(Color.yellow);
-					if(stack.size() == 1){
-						g.drawRect(count1p * 55 - 3, 60 * (stack.size()) - 33, 55, 55);
-					}
-					else{
-					g.drawRect(count1p * 55 - 3, 60 * (stack.size() + 1) - 33, 55, 55);
-					}
-					moving1 = false;
-				}
-				if (i == movedPosition) {
-					g.setColor(Color.cyan);
-					if (movedPosition > 17) {
-						g.drawRect((movedPosition - 10) * 55 - 3, 60 * (board.boardA[movedPosition].size()) - 33, 55,
-								55);
-					} else {
-						g.drawRect((movedPosition - 11) * 55 - 3, 60 * (board.boardA[movedPosition].size()) - 33, 55,
-								55);
-					}
-					moving2 = false;
-				}
-			}
 			g.setColor(Color.white);
 			g.drawString(i + "", count1p * 55, 25);
 
@@ -578,7 +409,7 @@ public class BackgammonGUI extends JPanel {
 		JFrame gameFrame = new JFrame();
 		gameFrame.setResizable(false);
 		gameFrame.setSize(1100, 740);
-		gameFrame.add(new BackgammonGUI());
+		gameFrame.add(new GameWalkthrough());
 		gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gameFrame.setVisible(true);
 	}
